@@ -1,0 +1,7 @@
+docker build -t springboot-docker-demo -f docker/Dockerfile .
+docker run -it -p 8080:8080 -e "SPRING_PROFILES_ACTIVE=local" --name springboot-docker-demo springboot-docker-demo
+
+docker push ghcr.io/naga1546/springboot-docker-demo:latest
+
+https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry
+docker tag 38f737a91f39 ghcr.io/OWNER/NEW_IMAGE_NAME:latest
