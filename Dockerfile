@@ -1,11 +1,11 @@
 FROM maven:3.5-jdk-8-alpine as build
 RUN mkdir -p /app
-ADD . /app
 WORKDIR /app
-ONBUILD ADD pom.xml /app
+#ONBUILD ADD . /app
 #ONBUILD RUN mvn install
-#COPY --from=0 /app/springboot-docker-demo /app
-RUN mvn install
+#COPY --from=clone /app/springboot-docker-demo /app
+ADD . /app
+#RUN mvn install # This step is not required if done manually
 
 FROM openjdk:8-jre-alpine
 WORKDIR /app
