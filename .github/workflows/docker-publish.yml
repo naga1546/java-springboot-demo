@@ -1,4 +1,4 @@
-name: Docker
+name: Build and Publish Docker
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -36,6 +36,16 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build with Maven
+        run: mvn -B package --file pom.xml
 
       # Install the cosign tool except on PR
       # https://github.com/sigstore/cosign-installer
