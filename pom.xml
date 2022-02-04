@@ -95,33 +95,6 @@
 	<build>
 		<pluginManagement>
 			<plugins>
-				<!-- Placed site-maven-plugin in pluginManagement to not push to github during 'mvn deploy' -->
-				<plugin>
-					<groupId>com.github.github</groupId>
-					<artifactId>site-maven-plugin</artifactId>
-					<version>0.12</version>
-					<configuration>
-						<message>Maven artifacts for ${project.version}</message>
-						<noJekyll>true</noJekyll>
-						<outputDirectory>${project.build.directory}</outputDirectory>
-						<branch>refs/heads/main</branch>
-						<includes>
-							<include>**/*</include>
-						</includes>
-						<merge>true</merge>
-						<repositoryName>${project.artifactId}</repositoryName>
-						<repositoryOwner>naga1546</repositoryOwner>
-						<server>github</server>
-					</configuration>
-					<executions>
-						<execution>
-							<goals>
-								<goal>site</goal>
-							</goals>
-							<phase>deploy</phase>
-						</execution>
-					</executions>
-				</plugin>
 			</plugins>
 		</pluginManagement>
 
@@ -130,78 +103,125 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId> 
 			</plugin>
-
-			<plugin>
-				<groupId>com.spotify</groupId>
-				<artifactId>docker-maven-plugin</artifactId>
-				<version>1.2.2</version>
-				<executions>
-					<execution>
-						<id>build-image</id>
-						<phase>package</phase>
-						<goals>
-							<goal>build</goal>
-						</goals>
-						<configuration>
-							<dockerDirectory>${project.basedir}/docker</dockerDirectory>
-							<imageName>${project.artifactId}</imageName>
-						</configuration>
-					</execution>
-					<execution>
-						<id>tag-image</id>
-						<phase>package</phase>
-						<goals>
-							<goal>tag</goal>
-						</goals>
-						<configuration>
-							<image>${project.artifactId}:${project.version}</image>
-							<newName>${docker.registry.host}/${project.artifactId}:${project.version}</newName>
-						</configuration>
-					</execution>
-					<execution>
-						<id>push-image</id>
-						<phase>deploy</phase>
-						<goals>
-							<goal>push</goal>
-						</goals>
-						<configuration>
-							<imageName>${project.artifactId}</imageName>
-							<registryUrl>${docker.registry.host}</registryUrl>
-							<dockerHost>https://${docker.registry.host}</dockerHost>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
-					<imageName>${project.artifactId}</imageName>
-					<dockerDirectory>{project.baseDir}/docker</dockerDirectory>
-					<useConfigFile>true</useConfigFile>
-					<registryUrl>${docker.registry.host}</registryUrl>
-					<!--dockerHost>https://${docker.registry.host}</dockerHost-->
-					<resources>
-						<resource>
-							<targetPath>/</targetPath>
-							<directory>${project.build.directory}</directory>
-							<include>${project.build.finalName}.jar</include>
-						</resource>
-					</resources>
-					<forceTags>false</forceTags>
-					<imageTags>
-						<imageTag>${project.version}</imageTag>
-					</imageTags>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<artifactId>maven-deploy-plugin</artifactId>
-				<version>2.8.2</version>
-				<configuration>
-					<altDeploymentRepository>
-						internal.repo::default::file://${project.build.directory}/mvn-artifact
-					</altDeploymentRepository>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>java-basic-checks</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+				<file>
+					<exists>${basedir}/src/main/java</exists>
+				</file>
+				<!-- To invoke this, use -DdeployEnabled -->
+				<property>
+					<name>deployEnabled</name>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<!-- Placed site-maven-plugin in pluginManagement to not push to github during 'mvn deploy' -->
+					<plugin>
+						<groupId>com.github.github</groupId>
+						<artifactId>site-maven-plugin</artifactId>
+						<version>0.12</version>
+						<configuration>
+							<message>Maven artifacts for ${project.version}</message>
+							<noJekyll>true</noJekyll>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<branch>refs/heads/main</branch>
+							<includes>
+								<include>**/*</include>
+							</includes>
+							<merge>true</merge>
+							<repositoryName>${project.artifactId}</repositoryName>
+							<repositoryOwner>naga1546</repositoryOwner>
+							<server>github</server>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>site</goal>
+								</goals>
+								<phase>deploy</phase>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>com.spotify</groupId>
+						<artifactId>docker-maven-plugin</artifactId>
+						<version>1.2.2</version>
+						<executions>
+							<execution>
+								<id>build-image</id>
+								<phase>package</phase>
+								<goals>
+									<goal>build</goal>
+								</goals>
+								<configuration>
+									<dockerDirectory>${project.basedir}/docker</dockerDirectory>
+									<imageName>${project.artifactId}</imageName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>tag-image</id>
+								<phase>package</phase>
+								<goals>
+									<goal>tag</goal>
+								</goals>
+								<configuration>
+									<image>${project.artifactId}:${project.version}</image>
+									<newName>${docker.registry.host}/${project.artifactId}:${project.version}</newName>
+								</configuration>
+							</execution>
+							<execution>
+								<id>push-image</id>
+								<phase>deploy</phase>
+								<goals>
+									<goal>push</goal>
+								</goals>
+								<configuration>
+									<imageName>${project.artifactId}</imageName>
+									<registryUrl>${docker.registry.host}</registryUrl>
+									<dockerHost>https://${docker.registry.host}</dockerHost>
+								</configuration>
+							</execution>
+						</executions>
+						<configuration>
+							<imageName>${project.artifactId}</imageName>
+							<dockerDirectory>{project.baseDir}/docker</dockerDirectory>
+							<useConfigFile>true</useConfigFile>
+							<registryUrl>${docker.registry.host}</registryUrl>
+							<!--dockerHost>https://${docker.registry.host}</dockerHost-->
+							<resources>
+								<resource>
+									<targetPath>/</targetPath>
+									<directory>${project.build.directory}</directory>
+									<include>${project.build.finalName}.jar</include>
+								</resource>
+							</resources>
+							<forceTags>false</forceTags>
+							<imageTags>
+								<imageTag>${project.version}</imageTag>
+							</imageTags>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<artifactId>maven-deploy-plugin</artifactId>
+						<version>2.8.2</version>
+						<configuration>
+							<altDeploymentRepository>
+								internal.repo::default::file://${project.build.directory}/mvn-artifact
+							</altDeploymentRepository>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 
 	<distributionManagement>
 		<!--<repository>
